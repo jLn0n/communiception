@@ -5,11 +5,16 @@ export type CommuniceptionConfig = {
 
 	CHANNELS_FETCH: () -> (RemoteEvent, UnreliableRemoteEvent),
 	CHANNELS_CHANGED: () -> (boolean),
+
+	IDENTIFIER_ENCRYPTION: IdentifierCrypterCallback,
+	IDENTIFIER_DECRYPTION: IdentifierCrypterCallback,
 }
 
 export type CommuniceptionChannels = {
 	["reliable"]: RemoteEvent,
 	["unreliable"]: UnreliableRemoteEvent,
 }
+
+export type IdentifierCrypterCallback = (string) -> (string)
 
 return nil

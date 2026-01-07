@@ -23,14 +23,17 @@ local module = {
 	listeners = {} :: {[string]: (...any) -> ()},
 }
 
-function module.processIncomingPackets(hz: number)
+function module.processIncomingPackets(
+	hz: number,
+	id_decrypter: types.IdentifierCrypterCallback
+)
 	while true do task.wait(hz)
 		local packet = module.incoming[1]
 		if not packet then
 			continue
 		end
 
-		local listener = module.listeners[packet.id]
+		local listener = module.listeners[id_decrypter(packet.id)]
 		if not listener then
 			continue
 		end
@@ -49,7 +52,11 @@ function module.processIncomingPackets(hz: number)
 	end
 end
 
-function module.processOutcomingPackets(hz: number, channels: types.CommuniceptionChannels)
+function module.processOutcomingPackets(
+	hz: number,
+	id_encrypter: types.IdentifierCrypterCallback,
+	channels: types.CommuniceptionChannels
+)
 	while true do task.wait(hz)
 		local packet = module.outcoming[1]
 		if not packet then
@@ -63,16 +70,18 @@ function module.processOutcomingPackets(hz: number, channels: types.Communicepti
 
 		table.remove(module.outcoming, 1)
 
+		local packet_id = id_encrypter(packet.id)
+
 		if IS_SERVER then
 			if (not packet.targets) then
 				continue
 			end
 
 			for _, target in packet.targets do
-				channel:FireClient(target, packet.id, unpack(packet.args))
+				channel:FireClient(target, packet_id, unpack(packet.args))
 			end
 		else
-			channel:FireServer(packet.id, unpack(packet.args))
+			channel:FireServer(packet_id, unpack(packet.args))
 		end
 	end
 end

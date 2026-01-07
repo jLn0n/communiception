@@ -1,11 +1,19 @@
 local pktshareds = require("@self/pktshareds")
 local types = require("@self/types")
 
+export type CommuniceptionConfig = types.CommuniceptionConfig
+
 local IS_SERVER = game:GetService("RunService"):IsServer()
 
 local communiception = {}
 
-function communiception.initialize(config: types.CommuniceptionConfig): ()
+function communiception.initialize(config: CommuniceptionConfig): ()
+	assert(typeof(config.PACKET_INTERVAL_HZ) == "number", "config.PACKET_INTERVAL_HZ is not a number!")
+	assert(typeof(config.CHANNELS_FETCH) == "function", "config.CHANNELS_FETCH is not a function!")
+	assert(typeof(config.CHANNELS_CHANGED) == "function", "config.CHANNELS_CHANGED is not a function!")
+	assert(typeof(config.IDENTIFIER_ENCRYPTION) == "function", "config.IDENTIFIER_ENCRYPTION is not a function!")
+	assert(typeof(config.IDENTIFIER_DECRYPTION) == "function", "config.IDENTIFIER_DECRYPTION is not a function!")
+
 	local PACKET_HZ = 1 / config.PACKET_INTERVAL_HZ
 	local CHANNELS = {} :: types.CommuniceptionChannels
 
@@ -76,8 +84,8 @@ function communiception.initialize(config: types.CommuniceptionConfig): ()
 		end
 	end)
 	task.defer(onChannelsChange)
-	task.spawn(pktshareds.processIncomingPackets, PACKET_HZ)
-	task.spawn(pktshareds.processOutcomingPackets, PACKET_HZ, CHANNELS)
+	task.spawn(pktshareds.processIncomingPackets, PACKET_HZ, config.IDENTIFIER_DECRYPTION)
+	task.spawn(pktshareds.processOutcomingPackets, PACKET_HZ, config.IDENTIFIER_ENCRYPTION, CHANNELS)
 end
 
 return communiception
