@@ -1,0 +1,80 @@
+local types = require("./types")
+
+local IS_SERVER = game:GetService("RunService"):IsServer()
+
+type CommonPacket = {
+	channel: types.CommunicationChannelType,
+	id: string,
+	args: {any},
+}
+
+export type IncomingPacket = CommonPacket & {
+	sender: Player?
+}
+
+export type OutcomingPacket = CommonPacket & {
+	targets: {Player}?
+}
+
+local module = {
+	incoming = {} :: {IncomingPacket},
+	outcoming = {} :: {OutcomingPacket},
+	
+	listeners = {} :: {[string]: (...any) -> ()},
+}
+
+function module.processIncomingPackets(hz: number)
+	while true do task.wait(hz)
+		local packet = module.incoming[1]
+		if not packet then
+			continue
+		end
+
+		local listener = module.listeners[packet.id]
+		if not listener then
+			continue
+		end
+
+		table.remove(module.incoming, 1)
+
+		if IS_SERVER then
+			if not packet.sender then
+				continue
+			end
+
+			task.spawn(listener, packet.sender, unpack(packet.args))
+		else
+			task.spawn(listener, unpack(packet.args))
+		end
+	end
+end
+
+function module.processOutcomingPackets(hz: number, channels: types.CommuniceptionChannels)
+	while true do task.wait(hz)
+		local packet = module.outcoming[1]
+		if not packet then
+			continue
+		end
+
+		local channel = channels[packet.channel]
+		if not ((typeof)(channel) == "Instance" and channel:IsDescendantOf(game)) then
+			continue
+		end
+
+		table.remove(module.outcoming, 1)
+
+		if IS_SERVER then
+			if (not packet.targets) then
+				continue
+			end
+
+			for _, target in packet.targets do
+				channel:FireClient(target, packet.id, unpack(packet.args))
+			end
+		else
+			channel:FireServer(packet.id, unpack(packet.args))
+		end
+	end
+end
+
+return module
