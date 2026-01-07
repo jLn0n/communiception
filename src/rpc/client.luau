@@ -53,7 +53,7 @@ function RPCClientImpl.invoke(self: RPCClientObject, timeout: number, ...): (boo
 	table.insert(pktshareds.outcoming, {
 		channel = "reliable" :: any,
 		id = self.id,
-		args = {1, id, ...},
+		args = {false, id :: any, ...},
 	})
 	return coroutine.yield()
 end
@@ -79,18 +79,18 @@ return function(id: string): RPCClientObject
 		listeners = {},
 	}
 
-	-- mode: 0 as incoming | 1 as outcoming
-	pktshareds.listeners[self.id] = function(mode: number, id: number, ...)
-		if mode == 0 then
+	-- mode: true as incoming | false as outcoming
+	pktshareds.listeners[self.id] = function(is_incoming: boolean, id: number, ...)
+		if is_incoming then
 			local listener = self._internal.listeners[id]
 			if not listener then
 				return
 			end
 
 			listener(...)
-		elseif mode == 1 then
+		else
 			local callback = self._internal.callback
-			local args: {any} = {0, id}
+			local args: {any} = {true, id}
 
 			if callback then
 				args[3] = true
