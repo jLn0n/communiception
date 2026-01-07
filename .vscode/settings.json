@@ -12,4 +12,7 @@
 	"luau-lsp.fflags.enableNewSolver": false,
 	"luau-lsp.completion.imports.enabled": false,
 	"luau-lsp.completion.enableFragmentAutocomplete": true,
+	"luau-lsp.fflags.override": {
+		"LuauExplicitTypeExpressionInstantiation": "true"
+	},
 }

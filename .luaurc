@@ -6,5 +6,7 @@
   "lintErrors": false,
   "typeErrors": true,
   "globals": [],
-  "aliases": {}
+  "aliases": {
+    "communiception": "./"
+  }
 }
