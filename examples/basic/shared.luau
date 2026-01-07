@@ -41,4 +41,8 @@ local config: communiception.CommuniceptionConfig = {
 	end
 }
 
-return config
+return function()
+	-- it needs to be initialized both in client-side and server-side first
+	-- network invocations will not work if communiception was not initialized first
+	communiception.initialize(config)
+end

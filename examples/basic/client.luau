@@ -1,4 +1,5 @@
 local communiception = require("@communiception/src/client")
+require("./shared")()
 
 -- ok so event is only one way and u can define functions from the double wrapped symbols
 local WaveEvent = communiception.event<<(string, number)>>("reliable", "OnWave")
