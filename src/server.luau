@@ -3,13 +3,12 @@ local types = require("@self/types")
 local EventServer = require("@self/event/server")
 local RPCServer = require("@self/rpc/server")
 
-type EventServer<A...> = EventServer.EventServer<A...>
-type RPCServer<A..., R...> = RPCServer.RPCServer<A..., R...>
+export type EventServer<A...> = EventServer.EventServer<A...>
+export type RPCServer<A..., R...> = RPCServer.RPCServer<A..., R...>
 
 local communiception = {}
 
-function communiception.event<A...>(
-	channel: types.CommunicationChannelType, id: string): EventServer<A...>
+function communiception.event<A...>(channel: types.CommunicationChannelType, id: string): EventServer<A...>
 	return EventServer(channel, id) :: any
 end
 

@@ -3,8 +3,8 @@ local types = require("@self/types")
 local EventClient = require("@self/event/client")
 local RPCClient = require("@self/rpc/client")
 
-type EventClient<A...> = EventClient.EventClient<A...>
-type RPCClient<A..., R...> = RPCClient.RPCClient<A..., R...>
+export type EventClient<A...> = EventClient.EventClient<A...>
+export type RPCClient<A..., R...> = RPCClient.RPCClient<A..., R...>
 
 local communiception = {}
 

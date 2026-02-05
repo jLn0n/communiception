@@ -13,6 +13,7 @@
 	"luau-lsp.completion.imports.enabled": false,
 	"luau-lsp.completion.enableFragmentAutocomplete": true,
 	"luau-lsp.fflags.override": {
-		"LuauExplicitTypeExpressionInstantiation": "true"
+		"LuauExplicitTypeInstantiationSyntax": "true",
+		"LuauExplicitTypeInstantiationSupport": "true",
 	},
 }
