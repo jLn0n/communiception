@@ -23,38 +23,40 @@ function communiception.initialize(config: CommuniceptionConfig): ()
 
 	if IS_SERVER then
 		signal_name = "OnServerEvent"
-		remote_handlers.reliable = function(sender: Player, id: string, ...)
+		remote_handlers.reliable = (function(sender: Player, id: string, ...)
 			table.insert(pktshareds.incoming, {
-				channel = "reliable" :: any,
+				channel = "reliable" :: "reliable",
 				id = id,
 				args = {...},
 				sender = sender
 			})
-		end
-		remote_handlers.unreliable = function(sender: Player, id: string, ...)
+		end) :: any
+		remote_handlers.unreliable = (function(sender: Player, id: string, ...)
 			table.insert(pktshareds.incoming, {
-				channel = "unreliable" :: any,
+				channel = "unreliable" :: "unreliable",
 				id = id,
 				args = {...},
 				sender = sender
 			})
-		end
+		end) :: any
 	else
 		signal_name = "OnClientEvent"
-		remote_handlers.reliable = function(id: string, ...)
+		remote_handlers.reliable = (function(id: string, ...)
 			table.insert(pktshareds.incoming, {
-				channel = "reliable" :: any,
+				channel = "reliable" :: "reliable",
 				id = id,
 				args = {...},
+				sender = nil
 			})
-		end
-		remote_handlers.unreliable = function(id: string, ...)
+		end) :: any
+		remote_handlers.unreliable = (function(id: string, ...)
 			table.insert(pktshareds.incoming, {
-				channel = "unreliable" :: any,
+				channel = "unreliable" :: "unreliable",
 				id = id,
 				args = {...},
+				sender = nil
 			})
-		end
+		end) :: any
 	end
 
 	local function onChannelsChange()
