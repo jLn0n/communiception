@@ -9,7 +9,7 @@ type CommonPacket = {
 }
 
 export type IncomingPacket = CommonPacket & {
-	sender: Player?
+	sender: Player?,
 }
 
 export type OutcomingPacket = CommonPacket & {
@@ -20,7 +20,7 @@ local module = {
 	incoming = {} :: {IncomingPacket},
 	outcoming = {} :: {OutcomingPacket},
 	
-	listeners = {} :: {[string]: (...any) -> ()},
+	listeners = {} :: {[string]: <A...>(A...) -> ()},
 }
 
 function module.processIncomingPackets(
@@ -78,10 +78,10 @@ function module.processOutcomingPackets(
 			end
 
 			for _, target in packet.targets do
-				channel:FireClient(target, packet_id, unpack(packet.args))
+				(channel :: any):FireClient(target, packet_id, unpack(packet.args))
 			end
 		else
-			channel:FireServer(packet_id, unpack(packet.args))
+			(channel :: any):FireServer(packet_id, unpack(packet.args))
 		end
 	end
 end

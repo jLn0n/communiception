@@ -19,7 +19,7 @@ function communiception.initialize(config: CommuniceptionConfig): ()
 
 	local RBXSignalConnect = game.Changed.Connect
 	local signal_name: "OnServerEvent" | "OnClientEvent" = nil :: any
-	local remote_handlers = {} :: {["reliable"]: (...any) -> (), ["unreliable"]: (...any) -> ()}
+	local remote_handlers = {} :: {["reliable" | "unreliable"]: (...any) -> ()}
 
 	if IS_SERVER then
 		signal_name = "OnServerEvent"

@@ -11,10 +11,11 @@ export type CommuniceptionConfig = {
 }
 
 export type CommuniceptionChannels = {
+	["reliable" | "unreliable"]: BaseRemoteEvent,
 	["reliable"]: RemoteEvent,
 	["unreliable"]: UnreliableRemoteEvent,
 }
 
-export type IdentifierCrypterCallback = (string) -> (string)
+export type IdentifierCrypterCallback = (id: string) -> (string)
 
 return nil

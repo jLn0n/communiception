@@ -24,10 +24,7 @@ type EventServerInternal = {
 	},
 }
 local EventServerImpl = {}
-type EventServerObject = typeof(setmetatable(
-	{} :: EventServerInternal,
-	{ __index = EventServerImpl }
-))
+type EventServerObject = setmetatable<EventServerInternal, {__index: typeof(EventServerImpl)}>
 
 function EventServerImpl.sendTo(self: EventServerObject, target: Player, ...)
 	table.insert(pktshareds.outcoming, {
@@ -50,7 +47,7 @@ end
 function EventServerImpl.listen<A...>(self: EventServerObject, listener: EventServerCallback<A...>): (() -> ())
 	local listener_id = self._internal.listener_count
 	self._internal.listener_count += 1
-	self._internal.listeners[listener_id] = listener
+	self._internal.listeners[listener_id] = listener :: any
 
 	return function()
 		self._internal.listeners[listener_id] = nil
@@ -58,7 +55,7 @@ function EventServerImpl.listen<A...>(self: EventServerObject, listener: EventSe
 end
 
 function EventServerImpl.listenOnce<A...>(self: EventServerObject, listener: EventServerCallback<A...>): (() -> ())
-	local disconnect_func
+	local disconnect_func: () -> ()
 	local function listener_wrapper(...)
 		(listener :: any)(...)
 		disconnect_func()
@@ -70,7 +67,7 @@ end
 
 function EventServerImpl.wait(self: EventServerObject): any
 	local thread = coroutine.running()
-	local disconnect_func
+	local disconnect_func: () -> ()
 
 	local function listener_wrapper(...)
 		disconnect_func()
@@ -98,9 +95,9 @@ return function(channel: types.CommunicationChannelType, id: string): EventServe
 		listeners = {},
 	}
 
-	pktshareds.listeners[self.id] = function(sender: Player, ...)
+	pktshareds.listeners[self.id] = function(...)
 		for _, listener in self._internal.listeners do
-			task.spawn(listener, sender, ...)
+			task.spawn(listener, ...)
 		end
 	end
 

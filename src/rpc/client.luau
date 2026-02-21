@@ -14,14 +14,11 @@ type RPCClientInternal = {
 	_internal: {
 		callback: (...any) -> (...any),
 		listener_count: number,
-		listeners: {(...any) -> ()},
+		listeners: {(invoked: boolean, ...any) -> ()},
 	},
 }
 local RPCClientImpl = {}
-type RPCClientObject = typeof(setmetatable(
-	{} :: RPCClientInternal,
-	{ __index = RPCClientImpl }
-))
+type RPCClientObject = setmetatable<RPCClientInternal, {__index: typeof(RPCClientImpl)}>
 
 function RPCClientImpl.invoke(self: RPCClientObject, timeout: number, ...): (boolean, ...any)
 	local thread = coroutine.running()
@@ -29,11 +26,11 @@ function RPCClientImpl.invoke(self: RPCClientObject, timeout: number, ...): (boo
 	local id = self._internal.listener_count
 	self._internal.listener_count += 1
 
-	self._internal.listeners[id] = function(callbackInvoked: boolean, ...)
+	self._internal.listeners[id] = function(invoked: boolean, ...)
 		received = true
 		self._internal.listeners[id] = nil
 
-		if callbackInvoked then
+		if invoked then
 			task.spawn(thread, true, ...)
 		else
 			task.spawn(thread, false)
@@ -51,9 +48,10 @@ function RPCClientImpl.invoke(self: RPCClientObject, timeout: number, ...): (boo
 	end)
 
 	table.insert(pktshareds.outcoming, {
-		channel = "reliable" :: any,
+		channel = "reliable" :: "reliable",
 		id = self.id,
-		args = {false, id :: any, ...},
+		args = {false, id, ...},
+		targets = nil,
 	})
 	return coroutine.yield()
 end
@@ -80,7 +78,7 @@ return function(id: string): RPCClientObject
 	}
 
 	-- mode: true as incoming | false as outcoming
-	pktshareds.listeners[self.id] = function(is_incoming: boolean, id: number, ...)
+	pktshareds.listeners[self.id] = (function(is_incoming: boolean, id: number, ...)
 		if is_incoming then
 			local listener = self._internal.listeners[id]
 			if not listener then
@@ -103,12 +101,13 @@ return function(id: string): RPCClientObject
 			end
 
 			table.insert(pktshareds.outcoming, {
-				channel = "reliable" :: any,
+				channel = "reliable" :: "reliable",
 				id = self.id,
 				args = args,
+				targets = nil,
 			})
 		end
-	end
+	end) :: any
 
 	return self
 end

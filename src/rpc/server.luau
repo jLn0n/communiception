@@ -14,14 +14,11 @@ type RPCServerInternal = {
 	_internal: {
 		callback: (...any) -> (...any),
 		listener_count: number,
-		listeners: {(...any) -> ()},
+		listeners: {(sender: Player, invoked: boolean, ...any) -> ()},
 	},
 }
 local RPCServerImpl = {}
-type RPCServerObject = typeof(setmetatable(
-	{} :: RPCServerInternal,
-	{ __index = RPCServerImpl }
-))
+type RPCServerObject = setmetatable<RPCServerInternal, {__index: typeof(RPCServerImpl)}>
 
 function RPCServerImpl.invokeTo(self: RPCServerObject, target: Player, timeout: number, ...): (boolean, ...any)
 	local thread = coroutine.running()
@@ -29,7 +26,7 @@ function RPCServerImpl.invokeTo(self: RPCServerObject, target: Player, timeout: 
 	local id = self._internal.listener_count
 	self._internal.listener_count += 1
 
-	self._internal.listeners[id] = function(sender: Player, callbackInvoked: boolean, ...)
+	self._internal.listeners[id] = function(sender: Player, invoked: boolean, ...)
 		if target ~= sender then
 			return
 		end
@@ -37,7 +34,7 @@ function RPCServerImpl.invokeTo(self: RPCServerObject, target: Player, timeout: 
 		received = true
 		self._internal.listeners[id] = nil
 
-		if callbackInvoked then
+		if invoked then
 			task.spawn(thread, true, ...)
 		else
 			task.spawn(thread, false)
@@ -55,9 +52,9 @@ function RPCServerImpl.invokeTo(self: RPCServerObject, target: Player, timeout: 
 	end)
 
 	table.insert(pktshareds.outcoming, {
-		channel = "reliable" :: any,
+		channel = "reliable" :: "reliable",
 		id = self.id,
-		args = {false, id :: any, ...},
+		args = {false, id, ...},
 		targets = {target},
 	})
 	return coroutine.yield()
@@ -85,7 +82,7 @@ return function(id: string): RPCServerObject
 	}
 
 	-- mode: true as incoming | false as outcoming
-	pktshareds.listeners[self.id] = function(sender: Player, is_incoming: boolean, id: number, ...)
+	pktshareds.listeners[self.id] = (function(sender: Player, is_incoming: boolean, id: number, ...)
 		if is_incoming then
 			local listener = self._internal.listeners[id]
 			if not listener then
@@ -108,13 +105,13 @@ return function(id: string): RPCServerObject
 			end
 
 			table.insert(pktshareds.outcoming, {
-				channel = "reliable" :: any,
+				channel = "reliable" :: "reliable",
 				id = self.id,
 				args = args,
 				targets = {sender},
 			})
 		end
-	end
+	end) :: any
 
 	return self
 end

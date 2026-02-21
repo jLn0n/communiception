@@ -9,8 +9,7 @@
 	"luau-lsp.diagnostics.strictDatamodelTypes": true,
     "luau-lsp.sourcemap.enabled": false,
 	"luau-lsp.types.robloxSecurityLevel": "None",
-	"luau-lsp.fflags.enableNewSolver": false,
-	"luau-lsp.completion.imports.enabled": false,
+	"luau-lsp.fflags.enableNewSolver": true,
 	"luau-lsp.completion.enableFragmentAutocomplete": true,
 	"luau-lsp.fflags.override": {
 		"LuauExplicitTypeInstantiationSyntax": "true",
