@@ -11,7 +11,7 @@ export type CommuniceptionConfig = {
 }
 
 export type CommuniceptionChannels = {
-	["reliable" | "unreliable"]: BaseRemoteEvent,
+	[CommunicationChannelType]: BaseRemoteEvent,
 	["reliable"]: RemoteEvent,
 	["unreliable"]: UnreliableRemoteEvent,
 }
